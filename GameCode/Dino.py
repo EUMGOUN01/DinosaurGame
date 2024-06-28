@@ -6,7 +6,7 @@ pygame.init()
 # 화면 크기 설정
 WIDTH, HEIGHT = 800, 400
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("크롬 공룡 게임")  # 윈도우 제목을 한글로 설정
+pygame.display.set_caption("공룡게임")  # 윈도우 제목을 한글로 설정
 
 # 색상 정의
 WHITE = (255, 255, 255)
@@ -15,15 +15,18 @@ RED = (255, 0, 0)
 
 # 공룡 설정
 dino_width, dino_height = 50, 50
-dino_x, dino_y = 50, HEIGHT - dino_height
+dino_x, dino_y = 50, HEIGHT - dino_height - 50  # 바닥 위에서 공룡이 시작하도록 설정
 is_jumping = False
 jump_velocity = 15
 gravity = 1
 
+# 바닥 설정
+ground_y = HEIGHT - 50
+
 # 장애물 설정
 obstacle_width, obstacle_height = 20, 40
 obstacle_x = WIDTH
-obstacle_y = HEIGHT - obstacle_height
+obstacle_y = ground_y - obstacle_height  # 바닥 위에 장애물을 위치하도록 설정
 obstacle_velocity = 10
 
 # 시작 화면 설정
@@ -39,7 +42,7 @@ restart_text = instruction_font.render("Press 'R' to restart", True, BLACK)
 
 # 게임 클리어 화면 설정
 game_clear_font = pygame.font.SysFont('malgungothic', 50)
-game_clear_text = game_clear_font.render("GAME CLEAR", True, BLACK)
+game_clear_text = game_clear_font.render("CLEAR", True, BLACK)
 
 # 점수 설정
 score = 0
@@ -110,7 +113,7 @@ while running:
                     is_start_screen = True
                     score = 0  # 점수 초기화
                     # 게임 재시작을 위한 변수 초기화
-                    dino_y = HEIGHT - dino_height
+                    dino_y = HEIGHT - dino_height - 50  # 바닥 위에서 시작하도록
                     obstacle_x = WIDTH
                     obstacle_velocity = 10
                     is_jumping = False
@@ -137,7 +140,7 @@ while running:
                     is_start_screen = True
                     score = 0  # 점수 초기화
                     # 게임 재시작을 위한 변수 초기화
-                    dino_y = HEIGHT - dino_height
+                    dino_y = HEIGHT - dino_height - 50  # 바닥 위에서 시작하도록
                     obstacle_x = WIDTH
                     obstacle_velocity = 10
                     is_jumping = False
@@ -157,7 +160,7 @@ while running:
         
         # 공룡 점프 로직
         keys = pygame.key.get_pressed()
-        if not is_jumping:
+        if not is_jumping and dino_y == ground_y - dino_height:  # 바닥 위에서만 점프 가능하도록
             if keys[pygame.K_SPACE]:  # 스페이스 키를 누르면 점프 시작
                 is_jumping = True
                 initial_jump_velocity = jump_velocity
@@ -165,9 +168,9 @@ while running:
         if is_jumping:
             dino_y -= initial_jump_velocity  # 공룡을 위로 이동
             initial_jump_velocity -= gravity  # 점프 속도에 중력 적용
-            if initial_jump_velocity < -jump_velocity:
+            if dino_y >= ground_y - dino_height:  # 바닥에 닿으면 점프 완료
                 is_jumping = False
-                dino_y = HEIGHT - dino_height  # 공룡을 바닥으로 리셋
+                dino_y = ground_y - dino_height  # 공룡을 바닥에 고정
         
         # 장애물 이동 로직
         obstacle_x -= obstacle_velocity
@@ -190,7 +193,7 @@ while running:
         pygame.draw.rect(screen, RED, (obstacle_x, obstacle_y, obstacle_width, obstacle_height))
         
         # 게임 클리어 조건
-        if score >= 1000:
+        if score >= 500:
             is_game_clear = True
     
     pygame.display.update()  # 화면 업데이트
